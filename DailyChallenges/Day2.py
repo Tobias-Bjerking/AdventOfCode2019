@@ -1,24 +1,19 @@
 import GetInput
+goal = 19690720
 
 
-def loop(values):
-    operators = values
-    for operator in range(0, len(operators), 4):
-        if operators[operator] == 1:
-            operators[operators[operator + 3]] = operators[operators[operator + 1]] + operators[operators[operator + 2]]
-        elif operators[operator] == 2:
-            operators[operators[operator + 3]] = operators[operators[operator + 1]] * operators[operators[operator + 2]]
-        elif operators[operator] == 99:
-            print("DONE!")
-            return operators
-        else:
-            print("ERROR!")
-    print("loop finished")
-    return operators
+def instruction(noun: int, verb: int) -> int:
+    memory = GetInput.get_numbered_line("../Input/Day2.txt")
+    memory[1] = noun
+    memory[2] = verb
+    pointer = 0
+    while memory[pointer] != 99:
+        if memory[pointer] == 1:
+            memory[memory[pointer + 3]] = memory[memory[pointer + 1]] + memory[memory[pointer + 2]]
+        elif memory[pointer] == 2:
+            memory[memory[pointer + 3]] = memory[memory[pointer + 1]] * memory[memory[pointer + 2]]
+        pointer += 4
+    return memory[0]
 
 
-values = GetInput.get_numbered_line("../Input/Day2.txt")
-values[1] = 12
-values[2] = 2
-test = [1,9,10,3,2,3,11,0,99,30,40,50]
-print(loop(values))
+print(instruction(12, 2))
