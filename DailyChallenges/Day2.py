@@ -1,5 +1,4 @@
 import GetInput
-goal = 19690720
 
 
 def instruction(noun: int, verb: int) -> int:
@@ -16,4 +15,13 @@ def instruction(noun: int, verb: int) -> int:
     return memory[0]
 
 
+def get_target_noun_and_verb(goal: int) -> int:
+    for i in range(100):
+        for j in range(100):
+            if instruction(i, j) == goal:
+                return i, j
+
+
 print(instruction(12, 2))
+result = get_target_noun_and_verb(19690720)
+print((100 * result[0]) + result[1])
