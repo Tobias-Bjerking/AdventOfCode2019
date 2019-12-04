@@ -10,10 +10,11 @@ def get_list(path: str) -> list:
     return values
 
 
-def get_numbered_line(path: str) -> list:
+def get_numbered_line(path: str, split: str = ",") -> list:
     values = get_list(path)
-    return list(map(int, values[0].split(",")))
+    return list(map(int, values[0].split(split)))
 
-def get_line(path: str) -> list:
+
+def get_line(path: str, split: str = ",") -> list:
     values = get_list(path)
-    return list(values[0].split(",")), list(values[1].split(","))
+    return list(values[0].split(split)), list(values[1].split(split))
