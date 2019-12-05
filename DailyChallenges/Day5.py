@@ -1,34 +1,67 @@
 import GetInput
 
-#memory = [4, 10, 99]
+memory = [3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,
+1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,
+999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99]
 memory = GetInput.get_numbered_line("../Input/Day5.txt")
 pointer = 0
 
-
 def addition():
     global pointer
-    operation = get_operations(memory[pointer])
-    memory[get_value(3, operation[4])] = memory[get_value(1, operation[2])] + memory[get_value(2, operation[3])]
+    memory[get_value(3)] = memory[get_value(1)] + memory[get_value(2)]
     pointer += 4
 
 
 def multiplication():
     global pointer
-    operation = get_operations(memory[pointer])
-    memory[get_value(3, operation[4])] = memory[get_value(1, operation[2])] * memory[get_value(2, operation[3])]
+    memory[get_value(3)] = memory[get_value(1)] * memory[get_value(2)]
     pointer += 4
 
 
 def save():
     global pointer
-    memory[memory[pointer + 1]] = 1
+    memory[memory[pointer + 1]] = 5
     pointer += 2
 
 
 def output():
     global pointer
-    print(memory[memory[pointer + 1]])
+    print(memory[get_value(1)])
     pointer += 2
+
+
+def jump_if_true():
+    global pointer
+    if memory[get_value(1)] != 0:
+        pointer = memory[get_value(2)]
+    else:
+        pointer += 3
+
+
+def jump_if_false():
+    global pointer
+    if memory[get_value(1)] == 0:
+        pointer = memory[get_value(2)]
+    else:
+        pointer += 3
+
+
+def less_than():
+    global pointer
+    if memory[get_value(1)] < memory[get_value(2)]:
+        memory[get_value(3)] = 1
+    else:
+        memory[get_value(3)] = 0
+    pointer += 4
+
+
+def equals():
+    global pointer
+    if memory[get_value(1)] == memory[get_value(2)]:
+        memory[get_value(3)] = 1
+    else:
+        memory[get_value(3)] = 0
+    pointer += 4
 
 
 def get_operations(operation):
@@ -42,7 +75,8 @@ def reverse_integer(number):
     return str(number)[::-1]
 
 
-def get_value(step, instruction):
+def get_value(step):
+    instruction = get_operations(memory[pointer])[step+1]
     if int(instruction) == 1:
         return pointer + step
     return memory[pointer + step]
@@ -57,6 +91,14 @@ def switch(operation):
         save()
     elif operation == 4:
         output()
+    elif operation == 5:
+        jump_if_true()
+    elif operation == 6:
+        jump_if_false()
+    elif operation == 7:
+        less_than()
+    elif operation == 8:
+        equals()
     else:
         print("ERROR!")
 
