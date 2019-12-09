@@ -1,106 +1,107 @@
-def reverse_integer(number):
-    return str(number)[::-1]
-
-
-def get_operations(operation):
-    operation = reverse_integer(operation)
-    while len(operation) < 5:
-        operation += "0"
-    return operation
-
-
 class IntcodeComputer:
-    def __init__(self, intcode: list, simulated_input=None):
-        if simulated_input is None:
-            simulated_input = []
-        self.program = intcode.copy()
-        self.memory = self.program.copy()
+    def __init__(self, program):
+        self.memory = program.copy()
         self.pointer = 0
-        if isinstance(simulated_input, list):
-            self.sim_input = simulated_input
-        else:
-            self.sim_input = [simulated_input]
+        self.rel_base = 0
+
+        for i in range(10000):
+            self.memory.append(0)
 
     def run(self):
-        out = None
-        while self.memory[self.pointer] != 99:
-            out = self.switch(int(reverse_integer(self.memory[self.pointer])[0]))
-            if out is not None:
-                return out
-        return out
+        opcode = int(str(self.memory[self.pointer])[-2:])
+        while opcode != 99:
+            self.__opcode(opcode)
+            opcode = int(str(self.memory[self.pointer])[-2:])
 
-    def give_input(self, simulated_input):
-        self.sim_input.append(simulated_input)
+    def __get_param(self, parameter, param):
+        return self.memory[self.__get_param_address(parameter, param)]
 
-    def addition(self):
-        self.memory[self.get_value(3)] = self.memory[self.get_value(1)] + self.memory[self.get_value(2)]
-        self.pointer += 4
+    def __set_param(self, parameter, param, value):
+        self.memory[self.__get_param_address(parameter, param)] = value
 
-    def multiplication(self):
-        self.memory[self.get_value(3)] = self.memory[self.get_value(1)] * self.memory[self.get_value(2)]
-        self.pointer += 4
-
-    def save(self):
-        if len(self.sim_input) < 1:
-            self.memory[self.memory[self.pointer + 1]] = int(input(">"))
+    def __get_param_address(self, parameter, param):
+        param_type = 0
+        try:
+            param_type = int(parameter[-param])
+        except:
+            pass
+        if param_type == 0:
+            return self.memory[self.pointer + param]
+        elif param_type == 1:
+            return self.pointer + param
+        elif param_type == 2:
+            offset = self.memory[self.pointer + param]
+            return self.rel_base + offset
         else:
-            self.memory[self.memory[self.pointer + 1]] = self.sim_input.pop(0)
+            print('Param type error')
+            return 0
+
+    def __addition(self, parameter):
+        self.__set_param(parameter, 3, self.__get_param(parameter, 1) + self.__get_param(parameter, 2))
+        self.pointer += 4
+
+    def __multiplication(self, parameter):
+        self.__set_param(parameter, 3, self.__get_param(parameter, 1) * self.__get_param(parameter, 2))
+        self.pointer += 4
+
+    def __input(self, parameter):
+        self.__set_param(parameter, 1, int(input(">")))
         self.pointer += 2
 
-    def output(self):
+    def __output(self, parameter):
+        out = self.__get_param(parameter, 1)
+        print(str(out))
         self.pointer += 2
-        return self.memory[self.get_value(1, self.pointer - 2)]
 
-    def jump_if_true(self):
-        if self.memory[self.get_value(1)] != 0:
-            self.pointer = self.memory[self.get_value(2)]
+    def __jump_if_true(self, parameter):
+        if self.__get_param(parameter, 1) != 0:
+            self.pointer = self.__get_param(parameter, 2)
         else:
             self.pointer += 3
 
-    def jump_if_false(self):
-        if self.memory[self.get_value(1)] == 0:
-            self.pointer = self.memory[self.get_value(2)]
+    def __jump_if_false(self, parameter):
+        if self.__get_param(parameter, 1) == 0:
+            self.pointer = self.__get_param(parameter, 2)
         else:
             self.pointer += 3
 
-    def less_than(self):
-        if self.memory[self.get_value(1)] < self.memory[self.get_value(2)]:
-            self.memory[self.get_value(3)] = 1
+    def __less_than(self, parameter):
+        if self.__get_param(parameter, 1) < self.__get_param(parameter, 2):
+            self.__set_param(parameter, 3, 1)
         else:
-            self.memory[self.get_value(3)] = 0
+            self.__set_param(parameter, 3, 0)
         self.pointer += 4
 
-    def equals(self):
-        if self.memory[self.get_value(1)] == self.memory[self.get_value(2)]:
-            self.memory[self.get_value(3)] = 1
+    def __equals(self, parameter):
+        if self.__get_param(parameter, 1) == self.__get_param(parameter, 2):
+            self.__set_param(parameter, 3, 1)
         else:
-            self.memory[self.get_value(3)] = 0
+            self.__set_param(parameter, 3, 0)
         self.pointer += 4
 
-    def get_value(self, step, point="NaN"):
-        if point == "NaN":
-            point = self.pointer
-        instruction = get_operations(self.memory[point])[step + 1]
-        if int(instruction) == 1:
-            return point + step
-        return self.memory[point + step]
+    def __set_relative_base(self, parameter):
+        self.rel_base += self.__get_param(parameter, 1)
+        self.pointer += 2
 
-    def switch(self, operation):
-        if operation == 1:
-            self.addition()
-        elif operation == 2:
-            self.multiplication()
-        elif operation == 3:
-            self.save()
-        elif operation == 4:
-            return self.output()
-        elif operation == 5:
-            self.jump_if_true()
-        elif operation == 6:
-            self.jump_if_false()
-        elif operation == 7:
-            self.less_than()
-        elif operation == 8:
-            self.equals()
+    def __opcode(self, opcode):
+        parameter = str(self.memory[self.pointer])[:-2]
+        if opcode == 1:
+            self.__addition(parameter)
+        elif opcode == 2:
+            self.__multiplication(parameter)
+        elif opcode == 3:
+            self.__input(parameter)
+        elif opcode == 4:
+            self.__output(parameter)
+        elif opcode == 5:
+            self.__jump_if_true(parameter)
+        elif opcode == 6:
+            self.__jump_if_false(parameter)
+        elif opcode == 7:
+            self.__less_than(parameter)
+        elif opcode == 8:
+            self.__equals(parameter)
+        elif opcode == 9:
+            self.__set_relative_base(parameter)
         else:
-            print("ERROR!")
+            print("Error!")
