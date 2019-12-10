@@ -29,7 +29,10 @@ def angle_between_vectors(x, y=(0,0)):
 
 def angle_from_vector(x, y=(0,0)):
     v = vector_subtraction(x, y)
-    return math.degrees(math.atan2(v[0],v[1]))
+    d = math.degrees(math.atan2(v[0],-v[1]))
+    while d < 0:
+        d += 360
+    return d
 
 
 def part_one():
@@ -45,4 +48,32 @@ def part_one():
             best_asteroid = current_asteroid
     return best_asteroid, best_number_of_asteroids
 
-print(part_one())
+
+def get_key(item):
+    return item[0], item[2]
+
+
+def part_two():
+    base = part_one()[0]
+    angles = []
+    for asteroid in asteroids:
+        if base != asteroid:
+            angles.append((angle_from_vector(asteroid, base), asteroid, euclidean_distance(asteroid, base)))
+    sorted_asteroids = (sorted(angles, key=get_key))
+    iterator = 0
+    while sorted_asteroids:
+        angle_found = -1
+        to_remove = []
+        for asteroid in sorted_asteroids:
+            if asteroid[0] > angle_found:
+                iterator += 1
+                if iterator == 200:
+                    return asteroid[1][0]*100 + asteroid[1][1]
+                angle_found = asteroid[0]
+                to_remove.append(asteroid)
+        for asteroid in to_remove:
+            sorted_asteroids.remove(asteroid)
+
+
+print("Part 1:", part_one())
+print("Part 2:", part_two())
