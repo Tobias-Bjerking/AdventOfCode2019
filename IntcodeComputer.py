@@ -3,14 +3,21 @@ class IntcodeComputer:
         self.memory = program.copy()
         self.pointer = 0
         self.rel_base = 0
+        self.sim_input = []
 
         for i in range(10000):
             self.memory.append(0)
 
-    def run(self):
+    def run(self, sim_input=None):
         opcode = int(str(self.memory[self.pointer])[-2:])
+        out = None
+        if sim_input is not None:
+            for i in sim_input:
+                self.sim_input.append(i)
         while opcode != 99:
-            self.__opcode(opcode)
+            out = self.__opcode(opcode)
+            if out is not None:
+                return out
             opcode = int(str(self.memory[self.pointer])[-2:])
 
     def __get_param(self, parameter, param):
@@ -45,13 +52,17 @@ class IntcodeComputer:
         self.pointer += 4
 
     def __input(self, parameter):
-        self.__set_param(parameter, 1, int(input(">")))
+        if len(self.sim_input) > 0:
+            inp = self.sim_input.pop(0)
+            self.__set_param(parameter, 1, inp)
+        else:
+            self.__set_param(parameter, 1, int(input(">")))
         self.pointer += 2
 
     def __output(self, parameter):
         out = self.__get_param(parameter, 1)
-        print(str(out))
         self.pointer += 2
+        return out
 
     def __jump_if_true(self, parameter):
         if self.__get_param(parameter, 1) != 0:
@@ -92,7 +103,7 @@ class IntcodeComputer:
         elif opcode == 3:
             self.__input(parameter)
         elif opcode == 4:
-            self.__output(parameter)
+            return self.__output(parameter)
         elif opcode == 5:
             self.__jump_if_true(parameter)
         elif opcode == 6:
