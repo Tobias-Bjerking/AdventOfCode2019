@@ -12,19 +12,24 @@ for moon in values:
     moons.append(coords)
     velocity.append([0,0,0])
 
+
+def step():
+    for moon in range(len(moons)):
+        for other_moon in moons:
+            if moons[moon] != other_moon:
+                for i in range(3):
+                    if moons[moon][i] < other_moon[i]:
+                        velocity[moon][i] = velocity[moon][i] + 1
+                    elif moons[moon][i] > other_moon[i]:
+                        velocity[moon][i] = velocity[moon][i] - 1
+    for moon in range(len(moons)):
+        for coord in range(len(moons[moon])):
+            moons[moon][coord] = moons[moon][coord] + velocity[moon][coord]
+
+
 def part_one():
-    for step in range(1000):
-        for moon in range(len(moons)):
-            for other_moon in moons:
-                if moons[moon] != other_moon:
-                    for i in range(3):
-                        if moons[moon][i] < other_moon[i]:
-                            velocity[moon][i] = velocity[moon][i] + 1
-                        elif moons[moon][i] > other_moon[i]:
-                            velocity[moon][i] = velocity[moon][i] - 1
-        for moon in range(len(moons)):
-            for coord in range(len(moons[moon])):
-                moons[moon][coord] = moons[moon][coord] + velocity[moon][coord]
+    for i in range(1000):
+        step()
     total_energy = 0
     for moon in range(len(moons)):
         pot_energy = kin_energy = 0
@@ -33,6 +38,5 @@ def part_one():
             kin_energy += abs(velocity[moon][coord])
         total_energy += pot_energy * kin_energy
     return total_energy
-
 
 print("Part 1:", part_one())
