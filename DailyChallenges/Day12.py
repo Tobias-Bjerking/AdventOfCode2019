@@ -3,14 +3,20 @@ import GetInput
 values = GetInput.get_list("../Input/Day12.txt")
 moons = []
 velocity = []
-for moon in values:
-    split = moon.split(">")[0]
-    split = split.split(",")
-    coords = []
-    for coord in split:
-        coords.append(int(coord.split("=")[1]))
-    moons.append(coords)
-    velocity.append([0,0,0])
+
+
+def initialize():
+    global moons, velocity
+    moons = []
+    velocity = []
+    for moon in values:
+        split = moon.split(">")[0]
+        split = split.split(",")
+        coords = []
+        for coord in split:
+            coords.append(int(coord.split("=")[1]))
+        moons.append(coords)
+        velocity.append([0,0,0])
 
 
 def step():
@@ -28,6 +34,7 @@ def step():
 
 
 def part_one():
+    initialize()
     for i in range(1000):
         step()
     total_energy = 0
