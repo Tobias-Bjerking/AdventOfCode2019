@@ -1,9 +1,10 @@
 class IntcodeComputer:
-    def __init__(self, program):
+    def __init__(self, program, input_func=None):
         self.memory = program.copy()
         self.pointer = 0
         self.rel_base = 0
         self.sim_input = []
+        self.input_func = input_func
 
         for i in range(10000):
             self.memory.append(0)
@@ -52,11 +53,14 @@ class IntcodeComputer:
         self.pointer += 4
 
     def __input(self, parameter):
-        if len(self.sim_input) > 0:
-            inp = self.sim_input.pop(0)
-            self.__set_param(parameter, 1, inp)
+        if self.input_func is not None:
+            self.__set_param(parameter, 1, self.input_func())
         else:
-            self.__set_param(parameter, 1, int(input(">")))
+            if len(self.sim_input) > 0:
+                inp = self.sim_input.pop(0)
+                self.__set_param(parameter, 1, inp)
+            else:
+                self.__set_param(parameter, 1, int(input(">")))
         self.pointer += 2
 
     def __output(self, parameter):
